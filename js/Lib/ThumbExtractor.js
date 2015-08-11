@@ -15,7 +15,7 @@ function normalizeData(data) {
 }
 
 
-let extractThumbnails = function(src, dst, callback) {
+let extractThumbnails = function(src, callback) {
 	src = src.replace(/%20/g, ' ');
 	thumbgen(src, { assetsDirectory: 'thumbnails', size: { width: 100 }, secondsPerThumbnail:120}, function(err, metadata) {
 		if (err) {

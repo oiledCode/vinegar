@@ -6,6 +6,8 @@ const app            = require('app');
 const dialog         = require('dialog');
 const BrowserWindow  = require('browser-window');
 const ipc            = require('ipc');
+const tex            = require('./js/Lib/ThumbExtractor.js');
+
 
 let win;
 
@@ -50,6 +52,12 @@ app.on('ready', function(){
 			properties : ['openDirectory'],
 		}, function(result) {
 			event.sender.send('dialog:response', result);
+		});
+	});
+
+	ipc.on('thumbnails:request', function(event, arg){
+		tex(arg, function(data){
+			event.sender.send('thumbnails:generated', data);
 		});
 	});
 });

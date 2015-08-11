@@ -6,7 +6,6 @@ const titlebar     = require('titlebar')();
 const ipc          = require('ipc');
 const mediaScanner = require('./js/Lib/MediaScanner.js');
 const streamer     = require('./js/Lib/Streamer.js');
-const tex          = require('./js/Lib/ThumbExtractor.js');
 const db           = require('./js/Lib/Database.js');
 
 
@@ -52,19 +51,22 @@ function loadHtmlPlayer(media) {
 		playerWrapper.removeClass('visible');
 		player.remove();
 	});
+
+	return player;
 }
 
 function onMovieSelected(mediaKey) {
 	let media    = medias[mediaKey];
 	db.createOrOpenDB('medias');
-	
 	if (!media.getThumbnailsData()) {
-		tex(media.getVideo(), '', function(data){
+		let player = loadHtmlPlayer(media);
+		ipc.on('thumbnails:generated', function(data){
 			media.setThumbnailsData(data);
 			db.alterDocument(mediaKey, media);
-			loadHtmlPlayer(media);
 			medias[mediaKey] = media;
+			player.setThumbnailsData(data);
 		});
+		ipc.send('thumbnails:request', media.getVideo());
 	} else {
 		loadHtmlPlayer(media);
 	}

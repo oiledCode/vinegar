@@ -47,7 +47,9 @@ function addObservers() {
 	$('.close-icon').on('click', function(){
 		onPlayerClose.call(this);
 	}.bind(this));
+};
 
+function addThumbnailsPreviewObserver() {
 	$('.video-progress-container').on('mouseover mousemove', function(e) {
 		var tooltip    = $('.thumbnail-preview');
 		var percentage = e.pageX / $('.video-progress-container')[0].offsetWidth
@@ -59,7 +61,7 @@ function addObservers() {
 		});
 	
 	}.bind(this));
-};
+}
 
 
 var Player = function(options) {
@@ -70,8 +72,11 @@ var Player = function(options) {
 	this.thumbPath = this.media.getThumbnailsPath();
 	this.$player.appendTo(this.$el);
 	
+
 	addObservers.call(this);
-	
+	if (this.thumbData) {
+		addThumbnailsPreviewObserver.call(this);
+	}
 	return this;
 };
 
@@ -85,6 +90,11 @@ Player.prototype.stop = function() {
 
 Player.prototype.remove = function() {
 	this.$player.remove();
+};
+
+Player.prototype.setThumbnailsData = function(data) {
+	this.thumbData = data;
+	addThumbnailsPreviewObserver.call(this);
 };
 
 Player.prototype.__proto__ = events.EventEmitter.prototype;
