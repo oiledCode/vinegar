@@ -23,7 +23,7 @@ function fetchAdditionalData(medias, callback) {
 
 	taskQueue.registerCallback(callback);
 	for (let i = 0, l = keys.length; i < l; i++ ) {
-		taskQueue.registerTask(omdb.get, [ { title: keys[i] }, false, createAdditionalDataClosure(medias[keys[i]], taskQueue, medias)]);
+		taskQueue.registerTask(omdb.get, [ { title: medias[keys[i]].getTitle() }, false, createAdditionalDataClosure(medias[keys[i]], taskQueue, medias)]);
 	}
 	taskQueue.start();
 }
@@ -54,7 +54,7 @@ function fetchPosters(mediasPath, medias, callback) {
 	taskQueue.registerCallback(callback);
 
 	for (let i = 0, l = keys.length; i < l; i++ ) {
-		_path = mediasPath + '/' + keys[i] + '/poster.jpg';
+		_path = medias[keys[i]].path + '/poster.jpg';
 		taskQueue.registerTask(downloadPoster, [keys[i], _path, medias, taskQueue]);
 	}
 	taskQueue.start();
@@ -63,6 +63,7 @@ function fetchPosters(mediasPath, medias, callback) {
 module.exports.fetchMetadata = function(medias, path, callback) {
 	_medias = medias;
 	fetchAdditionalData(_medias, function() {
+		console.log(_medias);
 		fetchPosters(path, _medias, function() {
 			callback(_medias);
 		});

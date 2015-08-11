@@ -1,14 +1,11 @@
 'use strict';
 let fs             = require('fs');
-// var Promise        = require('bluebird');
 let path           = require('path');
 let db             = require('./Database.js');
 let metaDownloader = require('./MediaMetadataDownloader.js');
+let ptn            = require('parse-torrent-name');
+let Media          = require('../models/Media.js')
 
-/*x
- * Promisification
- */
-// Promise.promisifyAll(fs)
 
 /*
  *
@@ -23,6 +20,12 @@ function isVideo(extname) {
 function isSubtitle(extname){
 	return (extname === 'srt' || extname === 'vtt');
 }
+/*
+ *
+ */
+function normalizeDirName(dirname) {
+	return dirname.replace(/ /g, '_');
+}
 
 /*
  *
@@ -36,29 +39,35 @@ function walkDir(mediasPath, callback) {
 			callback(error, null);
 		} 
 		for(let i=0, l=files.length; i<l; i++){
+			
 			let file  = files[i];
 			let _path = mediasPath + '/' +  file;
+		    let ndn   = normalizeDirName(file)
+
+			
 			if (fs.lstatSync(_path).isDirectory()) {
-				_medias[file] = {};
-				_dirContent.push({path: _path, file: file});
-			}
-		}
-		for(let j=0, n =_dirContent.length; j < n; j++ ) {
-			let obj = _dirContent[j];
-			let files = fs.readdirSync(obj.path);
-			for(let k=0, m=files.length; k<m; k++){
-				let file  = files[k];
-				let _path = obj.path + '/' +  file;
-				let ext   = path.extname(file).substr(1);
-				if (fs.lstatSync(_path).isFile()) {
-					if (isVideo(ext)) {
-						_medias[obj.file].video = _path;
-					} else if(isSubtitle(ext)) {
-						_medias[obj.file][ext] = _path;
+				let dirContent = fs.readdirSync(_path);
+				_medias[ndn] = new Media();
+				_medias[ndn].setPath(_path);
+				_medias[ndn].setDefaultPoster(__dirname + '/defaultPoster.jpg'); // this path is wrong !!
+				for(let j = 0, k = dirContent.length; j < k; j++) {
+					let entry     = dirContent[j];
+					let entryPath = _path + '/' + entry;
+					let ext       = path.extname(entry).substr(1);
+					if(fs.lstatSync(entryPath).isFile()){
+						if (isVideo(ext)) {
+							_medias[ndn].setVideo(entry);
+							_medias[ndn].setMediaInfo(ptn(entry));
+						} else if(isSubtitle(ext)){
+							_medias[ndn].setSubTitles(entry, ext);
+						}
 					} 
-				} 
+				}
+			} else {
+				// handle the simple file case
 			}
 		}
+		console.log(_medias);
 		callback(null, _medias);
 	});
 }
@@ -66,8 +75,9 @@ function walkDir(mediasPath, callback) {
 function createMediaObjectFromDBResponse(response) {
 	let medias = {};
 	for (let i = 0, l = response.length; i < l; i++) {
-		medias[response[i].id] = response[i].doc.media;
+		medias[response[i].id] = new Media(response[i].doc.media);//response[i].doc.media;
 	}
+	console.log(medias);
 	return medias;
 }
 

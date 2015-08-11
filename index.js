@@ -1,17 +1,19 @@
 
 "use strict";
 
-const titlebar = require('titlebar')();
+
+const titlebar     = require('titlebar')();
+const ipc          = require('ipc');
 const mediaScanner = require('./js/Lib/MediaScanner.js');
-const streamer = require('./js/Lib/Streamer.js');
-const ipc = require('ipc');
-// const deviceScanner = require('./js/Lib/DeviceScanner.js');
-// const path          = require('path');
+const streamer     = require('./js/Lib/Streamer.js');
+const tex          = require('./js/Lib/ThumbExtractor.js');
+const db           = require('./js/Lib/Database.js');
+
 
 
 window.$ = window.jQuery = require('jquery');
 
-const movieDir = '/Users/letteriodantoni/Desktop/movies';
+let movieDir = '/Users/letteriodantoni/Desktop/movies';
 let medias = {};
 let mediaList;
 
@@ -33,24 +35,14 @@ function addTitleBarObservers() {
 	});
 }
 
-function loadUpnpClient(path) {
-	// var devices = deviceScanner.getDevices();
-	// if (devices.length > 0) {
-	// 	streamer.initRenderClient(devices[0]);
-	// 	console.log(path);
-	// 	streamer.stream(path);
-	// }
-	// var source = $('<source>').attr({
-	// 	src: 'http://192.168.1.101:3000/'+path
-	// }).appendTo($('#video-player'));
-	// $('.player-wrapper').addClass('visible');
-}
 
-function loadHtmlPlayer(path) {
+
+function loadHtmlPlayer(media) {
 	let playerWrapper = $('.player-wrapper');
+	
 	let player = new Player({
 		el: $('.player-wrapper'),
-		videoUrl: 'http://127.0.0.1:3000/' + path
+		media : media
 	});
 
 	playerWrapper.addClass('visible');
@@ -62,12 +54,24 @@ function loadHtmlPlayer(path) {
 	});
 }
 
-function onMovieSelected(movie) {
-	const components = movie.split('/');
-	const l = components.length;
-	const path = '' + components[l-2] + '/' + components[l-1];
+function onMovieSelected(mediaKey) {
+	let media    = medias[mediaKey];
+	db.createOrOpenDB('medias');
+	
+	if (!media.getThumbnailsData()) {
+		tex(media.getVideo(), '', function(data){
+			media.setThumbnailsData(data);
+			db.alterDocument(mediaKey, media);
+			loadHtmlPlayer(media);
+			medias[mediaKey] = media;
+		});
+	} else {
+		loadHtmlPlayer(media);
+	}
+	console.log(media.getThumbnailsData());
+}
 
-	loadHtmlPlayer(path);
+function onMediaListRendered() {
 
 }
 
@@ -79,18 +83,28 @@ function searchMedia() {
 				medias = result;
 				mediaList = new MediaListView({medias: medias, el: $('.main-wrapper')});
 				mediaList.on('movie:selected', onMovieSelected);
-				mediaList.buildLayout();
+				mediaList.on('rendered', onMediaListRendered);
 				mediaList.render();
 			}
 		}
 	});
 }
 
+function addUIObserver() {
+	searchMedia();
+	// ipc.on('dialog:response', function(arg) {
+	// 		movieDir = arg[0];
+	// 		searchMedia();
+	// });
+	// $('.add-media-button').on('click', function(){
+	// 	ipc.send('dialog');
+	// });
+}
+
 onload = function() {
 	addTitleBarObservers();
 	titlebar.appendTo('#titlebar');
-	searchMedia();
-	// deviceScanner.discover();
+	addUIObserver();
 	streamer.startServer();
 
 }

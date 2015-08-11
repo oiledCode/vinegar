@@ -2,9 +2,11 @@
 /*
  *
  */
-let app            = require('app');
-let BrowserWindow  = require('browser-window');
-let ipc            = require('ipc');
+const app            = require('app');
+const dialog         = require('dialog');
+const BrowserWindow  = require('browser-window');
+const ipc            = require('ipc');
+
 let win;
 
 /*
@@ -25,9 +27,6 @@ app.on('ready', function(){
 
 	win.loadUrl('file://' + __dirname + '/index.html');
 
-	ipc.on('close', function(){
-
-	});
 
 	ipc.on('close', function(){
 		app.quit();
@@ -43,5 +42,14 @@ app.on('ready', function(){
 
 	ipc.on('fullscreen', function(){
 		win.setFullScreen(!win.isFullScreen());
+	});
+
+	ipc.on('dialog', function(event, arg){
+		dialog.showOpenDialog({
+			title: 'Add medias',
+			properties : ['openDirectory'],
+		}, function(result) {
+			event.sender.send('dialog:response', result);
+		});
 	});
 });

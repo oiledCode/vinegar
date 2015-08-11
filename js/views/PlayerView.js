@@ -27,6 +27,18 @@ function buildPlayer(options) {
 	return $videoEl;
 };
 
+function getThumbUrlForTimeStamp(time, thumbData) {
+	let obj;
+	let found = false;
+	for(let i = 0, l = thumbData.length; i < l && !found; i++) {
+		obj = thumbData[i];
+		if ((time <= obj.to && time >= obj.from)) {
+			found = true;
+		}
+	}
+	return obj.path;
+}
+
 function addObservers() {
 	this.$player.on('timeupdate', function(){
 		onTimeUpdate.call(this);
@@ -35,15 +47,27 @@ function addObservers() {
 	$('.close-icon').on('click', function(){
 		onPlayerClose.call(this);
 	}.bind(this));
+
+	$('.video-progress-container').on('mouseover mousemove', function(e) {
+		var tooltip    = $('.thumbnail-preview');
+		var percentage = e.pageX / $('.video-progress-container')[0].offsetWidth
+		var time       = Math.floor(percentage * this.$player[0].duration);
+		var url        = 'url(file://' + this.thumbPath + getThumbUrlForTimeStamp(time, this.thumbData) + ')';
+		tooltip.css({
+			'left' : (e.pageX - tooltip.outerWidth() / 2) + "px",
+			'background-image': url
+		});
+	
+	}.bind(this));
 };
 
 
 var Player = function(options) {
-	this.$el      = options.el;
-	this.videoUrl = options.videoUrl;
-	this.subUrl   = options.subUrl;
-	this.$player  = buildPlayer({ video_url: this.videoUrl, sub_url: this.subUrl } );
-	
+	this.$el       = options.el;
+	this.media     = options.media;
+	this.$player   = buildPlayer({ video_url: this.media.getVideo(), sub_url: this.media.getSubTitles('srt') } );
+	this.thumbData = this.media.getThumbnailsData();
+	this.thumbPath = this.media.getThumbnailsPath();
 	this.$player.appendTo(this.$el);
 	
 	addObservers.call(this);

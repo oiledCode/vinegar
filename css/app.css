@@ -9,6 +9,27 @@ html {
 body::-webkit-scrollbar {
   width: 0 !important;
 }
+.no-medias {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.no-medias .add-media-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  color: white;
+  display: inline-block;
+  width: 100px;
+  height: 50px;
+  background-color: #444444;
+  line-height: 50px;
+  text-align: center;
+  cursor: pointer;
+}
 .main-wrapper {
   width: 100%;
   height: 100%;
@@ -138,6 +159,14 @@ body::-webkit-scrollbar {
 }
 .player-wrapper .video-controls .video-bottom-toolbar .video-progress-container progress[value]::webkit-progress-value {
   background-color: #4ADEFF;
+}
+.player-wrapper .video-controls .video-bottom-toolbar .video-progress-container .thumbnail-preview {
+  position: absolute;
+  width: 110px;
+  height: 60px;
+  top: -70px;
+  left: 10px;
+  background-color: black;
 }
 .player-wrapper .video-controls .player-icons {
   font-size: 30px;

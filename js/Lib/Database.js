@@ -54,6 +54,17 @@ module.exports.putDocuments = function(documents, cb) {
 }
 
 
-module.exports.alterDocument = function(id, key, value, cb) {
-
+module.exports.alterDocument = function(id, value) {
+	store.get(id).then(function(doc) {
+	  return store.put({
+	    _id: id,
+	    _rev: doc._rev,
+	    media: value
+	  });
+	}).then(function(response) {
+	  // handle response
+	  console.log(response)
+	}).catch(function (err) {
+	  console.log(err);
+	});
 }
