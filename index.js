@@ -8,13 +8,13 @@ const mediaScanner = require('./js/Lib/MediaScanner.js');
 const streamer     = require('./js/Lib/Streamer.js');
 const db           = require('./js/Lib/Database.js');
 
-
-
 window.$ = window.jQuery = require('jquery');
 
+let dbNmame  = 'medias';
 let movieDir = '/Users/letteriodantoni/Desktop/movies';
 let medias = {};
 let mediaList;
+
 
 function addTitleBarObservers() {
 	titlebar.on('close', function onClose() {
@@ -74,39 +74,61 @@ function onMovieSelected(mediaKey) {
 }
 
 function onMediaListRendered() {
+	$('.no-medias').removeClass('visible').remove();
+}
 
+function onLibraryResultRetrieved(result){
+	if (result) {
+		medias = result;
+		mediaList = new MediaListView({medias: medias, el: $('.main-wrapper')});
+		mediaList.on('movie:selected', onMovieSelected);
+		mediaList.on('rendered', onMediaListRendered);
+		mediaList.render();
+	}
 }
 
 function searchMedia() {
-	mediaScanner.scanMedia({
-		path: movieDir,
-		onScanEnd : function(result) {
-			if (result) {
-				medias = result;
-				mediaList = new MediaListView({medias: medias, el: $('.main-wrapper')});
-				mediaList.on('movie:selected', onMovieSelected);
-				mediaList.on('rendered', onMediaListRendered);
-				mediaList.render();
-			}
+	mediaScanner.scanMedia({ path: movieDir, onScanEnd: onLibraryResultRetrieved});
+}
+
+function checkLibraryExistence() {
+	db.exist(dbNmame, function(err, result) {
+		if (!err && result) {
+			db.createOrOpenDB(dbNmame);
+			db.getAllDocuments(function(err, result) {
+				if (err) {
+					console.error(err);
+				} else {
+					onLibraryResultRetrieved(mediaScanner.parseDBResult(result));
+				}
+			});
+		} else {
+			addInputLibraryUI();
 		}
 	});
 }
 
-function addUIObserver() {
-	searchMedia();
-	// ipc.on('dialog:response', function(arg) {
-	// 		movieDir = arg[0];
-	// 		searchMedia();
-	// });
-	// $('.add-media-button').on('click', function(){
-	// 	ipc.send('dialog');
-	// });
+function addInputLibraryUI() {
+	$('.no-medias').addClass('visible');
+	$('.add-media-button').addClass('visible');
+	ipc.on('dialog:response', function(arg) {
+		if (arg && arg[0]) {
+			$('.add-media-button').removeClass('visible');
+			$('.processing-media-loader').addClass('visible');
+			movieDir = arg[0];
+			searchMedia();
+		}
+	});
+	
+	$('.add-media-button').on('click', function(){
+		ipc.send('dialog');
+	});
 }
 
 onload = function() {
 	addTitleBarObservers();
+	checkLibraryExistence();
 	titlebar.appendTo('#titlebar');
-	addUIObserver();
 	streamer.startServer();
 
 }

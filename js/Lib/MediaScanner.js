@@ -75,16 +75,18 @@ function walkDir(mediasPath, callback) {
 function createMediaObjectFromDBResponse(response) {
 	let medias = {};
 	for (let i = 0, l = response.length; i < l; i++) {
-		medias[response[i].id] = new Media(response[i].doc.media);//response[i].doc.media;
+		medias[response[i].id] = new Media(response[i].doc.media);
 	}
-	console.log(medias);
 	return medias;
+}
+
+module.exports.parseDBResult = function(data) {
+	return createMediaObjectFromDBResponse(data);
 }
 
 module.exports.scanMedia = function(options) {
 	db.exist('medias', function(err, result) {
 		if (!err && result) {
-			console.log('DATABASE EXIST');
 			db.createOrOpenDB('medias');
 			db.getAllDocuments(function(err, result) {
 				if (err) {
@@ -94,7 +96,6 @@ module.exports.scanMedia = function(options) {
 				}
 			});
 		} else {
-			console.log('DATABASE DOES NOT EXIST');
 			walkDir(options.path, function(error, result) {
 				if (!error) {
 					metaDownloader.fetchMetadata(result, options.path, function(result) {
