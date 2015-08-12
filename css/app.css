@@ -89,36 +89,6 @@ body::-webkit-scrollbar {
 #titlebar .titlebar .titlebar-stoplight {
   margin: 5px;
 }
-.movie-card {
-  width: 140px;
-  height: 230px;
-  margin: 10px;
-  background-color: transparent;
-  display: inline-block;
-}
-.poster-card {
-  cursor: pointer;
-  width: 140px;
-  height: 200px;
-  display: inline-block;
-  background-color: black;
-  background-size: cover;
-  background-position: 50% 50%;
-  border-radius: 5px;
-  box-shadow: 1px 1px 8px 1px rgba(0, 0, 0, 0.56);
-}
-.movie-title {
-  width: 100%;
-  display: block;
-  font-size: 13px;
-  font-family: helvetica neue;
-  color: #838383;
-  font-weight: 500;
-  -webkit-font-smoothing: antialiased;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
 /********************************
  * PLAYER STYLE
  ********************************/
@@ -219,4 +189,51 @@ body::-webkit-scrollbar {
 }
 .player-wrapper .video-controls .player-icons.close-icon {
   right: 10px;
+}
+.movie-card {
+  width: 140px;
+  height: 230px;
+  margin: 10px;
+  background-color: transparent;
+  display: inline-block;
+}
+.movie-card .poster-card {
+  position: relative;
+  cursor: pointer;
+  width: 140px;
+  height: 200px;
+  display: inline-block;
+  background-color: black;
+  background-size: cover;
+  background-position: 50% 50%;
+  border-radius: 5px;
+  box-shadow: 1px 1px 8px 1px rgba(0, 0, 0, 0.56);
+  box-sizing: border-box;
+}
+.movie-card .poster-card .poster-card__hover-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  border: 2px solid #8cdda6;
+  box-sizing: border-box;
+  background-color: rgba(21, 21, 21, 0.49);
+  opacity: 0;
+}
+.movie-card .poster-card .poster-card__hover-layer:hover {
+  opacity: 1.0;
+}
+.movie-card .movie-title {
+  width: 100%;
+  display: block;
+  font-size: 13px;
+  font-family: helvetica neue;
+  color: #838383;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }

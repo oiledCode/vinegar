@@ -17,10 +17,10 @@ function createMediainfoBox(info) {
 
 function createPosterCard(posterURL , key) {
 	let card; 
+	let hoverLayer;
 	
-	card = $('<div>', {'class' : 'poster-card'})
-		.css('background-image','url(file://'+posterURL+')')
-		.data('mediakey', key);
+	card       = $('<div>', {'class' : 'poster-card'}).css('background-image','url(file://'+posterURL+')');
+	hoverLayer = $('<div>', {'class' : 'poster-card__hover-layer'}).data('mediakey', key).appendTo(card);
 	
 	return card;
 }

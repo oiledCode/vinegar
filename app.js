@@ -25,7 +25,7 @@ app.on('ready', function(){
 		transparent: false,
 	});
 
-	// win.openDevTools({detach: true});
+	win.openDevTools({detach: true});
 
 	win.loadUrl('file://' + __dirname + '/index.html');
 
