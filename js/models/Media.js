@@ -72,7 +72,7 @@ Media.prototype.getThumbnailsData = function() {
 };
 
 Media.prototype.getThumbnailsPath = function(first_argument) {
-	return this.path.replace(/ /g, '%20');
+	return this.path.replace(/ /g, '%20').replace('(', '%28').replace(')', '%29');
 };
 
 module.exports = Media;
