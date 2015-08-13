@@ -154,6 +154,9 @@ body::-webkit-scrollbar {
 .player-wrapper .video-controls .video-bottom-toolbar .video-progress-container:hover {
   top: -17px;
 }
+.player-wrapper .video-controls .video-bottom-toolbar .video-progress-container:hover .thumbnail-preview {
+  opacity: 1;
+}
 .player-wrapper .video-controls .video-bottom-toolbar .video-progress-container progress {
   width: 100%;
   -webkit-appearance: none;
@@ -175,7 +178,13 @@ body::-webkit-scrollbar {
   height: 60px;
   top: -70px;
   left: 10px;
-  background-color: black;
+  background-color: #1d1d1d;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size: contain;
+  box-sizing: border-box;
+  border: 1px solid green;
+  opacity: 0;
 }
 .player-wrapper .video-controls .player-icons {
   font-size: 30px;

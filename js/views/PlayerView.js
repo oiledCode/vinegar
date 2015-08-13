@@ -19,7 +19,7 @@ function onTimeUpdate() {
 };
 
 function buildPlayer(options) {
-	var $videoEl = $('<video id="video-player" autoplay></video>');
+	var $videoEl = $('<video id="video-player"></video>');
 	var $source  = $('<source>').attr('src', options.video_url);
 	
 	$source.appendTo($videoEl);
@@ -49,18 +49,40 @@ function addObservers() {
 	}.bind(this));
 };
 
+function getPreviewBounds(){
+	var bounds = {};
+	bounds.lower = 10;
+	bounds.upper  = $('.video-progress-container')[0].offsetWidth - $('.thumbnail-preview').outerWidth() - 10;
+	return bounds;
+}
+
 function addThumbnailsPreviewObserver() {
-	$('.video-progress-container').on('mouseover mousemove', function(e) {
-		var tooltip    = $('.thumbnail-preview');
-		var percentage = e.pageX / $('.video-progress-container')[0].offsetWidth
-		var time       = Math.floor(percentage * this.$player[0].duration);
-		var url        = 'url(file://' + this.thumbPath + getThumbUrlForTimeStamp(time, this.thumbData) + ')';
-		tooltip.css({
-			'left' : (e.pageX - tooltip.outerWidth() / 2) + "px",
-			'background-image': url
-		});
-	
-	}.bind(this));
+	setTimeout(function(){
+		this.$videoProgress    = $('.video-progress-container');
+		this.$thumbPreview     = $('.thumbnail-preview');
+		this.thumbPreviewWidth = this.$thumbPreview.outerWidth();
+	    this.previewBounds     = getPreviewBounds.call(this);
+
+		this.$videoProgress.on('mouseover mousemove', function(e) {
+			let percentage = e.pageX / this.$videoProgress[0].offsetWidth
+			let time       = Math.floor(percentage * this.$player[0].duration);
+			let url        = 'url(file://' + this.thumbPath + getThumbUrlForTimeStamp(time, this.thumbData) + ')';
+			let left       = (e.pageX - this.$thumbPreview.outerWidth() / 2);
+			
+			if (left < this.previewBounds.lower) {
+				left = this.previewBounds.lower;
+			}
+			else if (left > this.previewBounds.upper) {
+				left = this.previewBounds.upper;
+			}
+			
+			this.$thumbPreview.css({
+				'left' : left + "px",
+				'background-image': url
+			});
+		
+		}.bind(this));
+	}.bind(this),100);
 }
 
 
@@ -71,8 +93,6 @@ var Player = function(options) {
 	this.thumbData = this.media.getThumbnailsData();
 	this.thumbPath = this.media.getThumbnailsPath();
 	this.$player.appendTo(this.$el);
-	
-
 	addObservers.call(this);
 	if (this.thumbData) {
 		addThumbnailsPreviewObserver.call(this);
