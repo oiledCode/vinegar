@@ -19,7 +19,7 @@ function onTimeUpdate() {
 };
 
 function buildPlayer(options) {
-	var $videoEl = $('<video id="video-player"></video>');
+	var $videoEl = $('<video id="video-player" autoplay></video>');
 	var $source  = $('<source>').attr('src', options.video_url);
 	
 	$source.appendTo($videoEl);
